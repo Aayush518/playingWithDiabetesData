@@ -77,7 +77,9 @@ The Diabetes Prediction web app offers the following features:
 ## Screenshots
 
 Here are some screenshots of the Diabetes Prediction web app:
-
+![1](https://github.com/Aayush518/playingWithDiabetesData/assets/77236863/a073dccd-437d-4377-b182-b0a72e76f8af)
+![2](https://github.com/Aayush518/playingWithDiabetesData/assets/77236863/46250c77-1f41-41a8-8d04-2efe3b191f87)
+![3](https://github.com/Aayush518/playingWithDiabetesData/assets/77236863/e985412a-638d-423c-aee9-fc8bc9e42e59)
 ![image](https://github.com/Aayush518/playingWithDiabetesData/assets/77236863/b4f7125b-7f90-4314-a165-ca31d7cbcbce)
 ![image](https://github.com/Aayush518/playingWithDiabetesData/assets/77236863/f1410b7d-8d93-418a-9014-54b30c7fda7b)
 ![image](https://github.com/Aayush518/playingWithDiabetesData/assets/77236863/b6485842-d5c7-4314-967a-0a5eb4666d1d)
