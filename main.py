@@ -2,14 +2,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_curve, auc
-import shap
-import pdpbox
 import streamlit as st
 
 def load_data():
@@ -28,28 +24,12 @@ def feature_scaling(X_train, X_test):
     X_test_scaled = scaler.transform(X_test)
     return X_train_scaled, X_test_scaled
 
-def train_and_evaluate(X_train, X_test, y_train, y_test, model_name):
-    if model_name == "Random Forest":
-        clf = RandomForestClassifier(random_state=42)
-        param_grid = {"n_estimators": [50, 100, 200], "max_depth": [None, 5, 10, 20]}
-    elif model_name == "Logistic Regression":
-        clf = LogisticRegression(random_state=42)
-        param_grid = {"C": [0.1, 1.0, 10.0]}
-    elif model_name == "SVM":
-        clf = SVC(probability=True, random_state=42)
-        param_grid = {"C": [0.1, 1.0, 10.0], "kernel": ["linear", "rbf"]}
-    else:
-        return
-
-    grid_search = GridSearchCV(clf, param_grid, cv=5)
-    grid_search.fit(X_train, y_train)
-
-    best_model = grid_search.best_estimator_
-    y_pred = best_model.predict(X_test)
+def train_and_evaluate(X_train, X_test, y_train, y_test, X, y):
+    clf = RandomForestClassifier(random_state=42)
+    clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
 
     accuracy = accuracy_score(y_test, y_pred)
-    st.write("Model:", model_name)
-    st.write("Best Parameters:", grid_search.best_params_)
     st.write("Accuracy:", accuracy)
 
     st.write("\nClassification Report:")
@@ -58,28 +38,26 @@ def train_and_evaluate(X_train, X_test, y_train, y_test, model_name):
     st.write("\nConfusion Matrix:")
     st.write(confusion_matrix(y_test, y_pred))
 
-    plot_roc_curve(best_model, X_test, y_test)
+    plot_roc_curve(clf, X_test, y_test)
 
-    # Feature Importance
-    if model_name == "Random Forest":
-        st.write("\nFeature Importance:")
-        feature_importance = pd.Series(best_model.feature_importances_, index=X.columns)
-        feature_importance.sort_values(ascending=False, inplace=True)
-        st.bar_chart(feature_importance)
+    # Additional Features
+    st.subheader("Additional Features:")
 
-    # Partial Dependence Plots (PDP) for the first two features
-    st.write("\nPartial Dependence Plots:")
-    if model_name == "Random Forest":
-        fig, axes = pdpbox.pdp.pdp_interact_plot(model=best_model, dataset=X_train, model_features=X.columns, features=["Glucose", "BMI"])
-        st.pyplot(fig)
+    # Pie Chart - Target Variable Distribution
+    st.write("\nPie Chart - Target Variable Distribution:")
+    fig, ax = plt.subplots()
+    y_train.value_counts().plot.pie(autopct="%1.1f%%", labels=["Non-Diabetic", "Diabetic"], colors=['skyblue', 'lightcoral'], ax=ax)
+    ax.set_title('Target Variable Distribution')
+    st.pyplot(fig)
 
-    # SHAP (SHapley Additive exPlanations) for individual predictions
-    st.write("\nSHAP (SHapley Additive exPlanations):")
-    if model_name == "Random Forest":
-        explainer = shap.Explainer(best_model)
-        shap_values = explainer(X_train)
-        shap.summary_plot(shap_values, X_train)
-        st.pyplot(fig)
+    # Line Chart - Glucose Levels vs. Age
+    st.write("\nLine Chart - Glucose Levels vs. Age:")
+    fig, ax = plt.subplots()
+    X_train_df = pd.DataFrame(X_train, columns=X.columns)
+    X_train_df["Age"] = X_train_df["Age"].astype(int)
+    sns.lineplot(data=X_train_df, x="Age", y="Glucose", hue=y_train, palette="husl", ax=ax)
+    ax.set_title('Glucose Levels vs. Age')
+    st.pyplot(fig)
 
 def plot_roc_curve(clf, X, y):
     st.write("\nROC Curve:")
@@ -118,13 +96,8 @@ def main():
         ax.set_title(col)
         st.pyplot(fig)
 
-    # Model Selection
-    st.subheader("Model Selection:")
-    model_name = st.selectbox("Select a model:", ["Random Forest", "Logistic Regression", "SVM"])
-    st.write("You selected:", model_name)
-
     st.subheader("Model Performance:")
-    train_and_evaluate(X_train_scaled, X_test_scaled, y_train, y_test, model_name)
+    train_and_evaluate(X_train_scaled, X_test_scaled, y_train, y_test, X, y)
 
 if __name__ == "__main__":
     main()
