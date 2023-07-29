@@ -32,6 +32,7 @@ To run the app, use the following command:
 
 ```
 streamlit run app.py
+streamlit main.py
 ```
 
 The app will start running on your local server. Open your web browser and visit `http://localhost:8501` to access the Diabetes Prediction Web App.
